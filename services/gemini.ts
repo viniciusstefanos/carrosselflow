@@ -127,7 +127,7 @@ export const generateVideo = async (
 export const generateCarouselScript = async (
   apiKey: string,
   topic: string,
-  count: number = 5,
+  count: number = 7,
   promptTemplate?: string
 ): Promise<Array<{ title: string; body: string }>> => {
   const ai = getClient(apiKey);
@@ -136,18 +136,28 @@ export const generateCarouselScript = async (
   let prompt = promptTemplate;
 
   if (!prompt) {
-    prompt = `
-    You are a social media expert. Create a {{count}}-slide Instagram carousel about: "{{topic}}".
-    
-    Rules:
-    1. Slide 1 must be a hook/cover.
-    2. The last slide must be a call to action.
-    3. Keep titles short (max 5 words).
-    4. Keep body text punchy and minimal (max 20 words).
-    
-    Return ONLY a JSON array of objects. Each object must have exactly two properties: "title" and "body".
-    Do not wrap in markdown code blocks. Just return the raw JSON string.
-    `;
+    // Default Persona: Viral Content Creator with Deep Narrative Structure
+    prompt = `Role: You are a specialist in creating viral Instagram carousels.
+    Task: Create a {{count}}-slide carousel script about: "{{topic}}".
+
+    Narrative Structure:
+    1. Slide 1 (The Hook): A curiosity-inducing question, strong statement, or specific promise.
+    2. Slide 2 (Context): Situate the problem specifically for the target audience.
+    3. Slide 3 (Agitation): Deepen the pain point to create emotional identification.
+    4. Slides 4 to {{count}}-1 (The Solution): Actionable steps, frameworks, or specific insights.
+    5. Slide {{count}} (CTA): A clear directive to Save, Share, or Comment.
+
+    Style Rules:
+    - Tone: Authoritative yet accessible.
+    - Mental Triggers: Use curiosity and reciprocity.
+    - Visuals: Use emojis intentionally to reinforce the message.
+    - Titles: Short & punchy (Max 7 words).
+    - Body: Clean & minimalist (Max 30 words). Use <b>bold</b> for key insights.
+
+    Output Format:
+    Return ONLY a raw JSON array of objects.
+    Each object must have exactly: "title" and "body".
+    NO markdown formatting (no \`\`\`json).`;
   }
 
   // Replace placeholders with actual values
@@ -174,7 +184,8 @@ export const generateCarouselScript = async (
 export const refineText = async (
   apiKey: string,
   text: string,
-  type: 'shorten' | 'expand' | 'punchy' | 'fix'
+  type: 'shorten' | 'expand' | 'punchy' | 'fix',
+  useEmojis: boolean = true
 ): Promise<string> => {
   const ai = getClient(apiKey);
   const model = 'gemini-2.5-flash';
@@ -182,12 +193,31 @@ export const refineText = async (
   let instruction = "";
   switch (type) {
     case 'shorten': instruction = "Shorten this text significantly while keeping the meaning. Be concise."; break;
-    case 'expand': instruction = "Expand this text with a bit more detail and context, suitable for a presentation slide."; break;
+    case 'expand': instruction = "Expand this text into multiple paragraphs if necessary. Add detail and context suitable for an educational slide."; break;
     case 'punchy': instruction = "Make this text punchy, impactful, and persuasive. Use strong verbs."; break;
     case 'fix': instruction = "Fix any grammar or spelling errors in this text. Return the corrected text only."; break;
   }
 
-  const prompt = `Instruction: ${instruction}\n\nInput Text: "${text}"\n\nOutput (Return ONLY the refined text, no preamble):`;
+  const emojiInstruction = useEmojis 
+    ? "Include relevant emojis to enhance engagement." 
+    : "STRICTLY NO EMOJIS.";
+
+  const prompt = `
+  Role: Professional Copy Editor.
+  
+  Task: Rewrite the input text based on the following instruction: "${instruction}"
+  
+  Constraint Checklist & Confidence Score:
+  1. ${emojiInstruction}
+  2. Use HTML tags <b>text</b> for bolding key phrases (DO NOT use markdown **).
+  3. Use HTML tags <mark>text</mark> for highlighting important words.
+  4. Automatically apply bold and highlight to the most important parts for visual hierarchy.
+  5. Use \\n (newlines) to separate paragraphs if the text is long.
+  
+  Input Text: "${text}"
+  
+  Output (Return ONLY the refined text, no preamble):
+  `;
 
   const response = await ai.models.generateContent({
     model,

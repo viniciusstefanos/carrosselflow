@@ -8,16 +8,27 @@ interface AIWriterProps {
   onScriptGenerated: (slides: Slide[]) => void;
 }
 
-const DEFAULT_PROMPT_TEMPLATE = `You are a social media expert. Create a {{count}}-slide Instagram carousel about: "{{topic}}".
+const DEFAULT_PROMPT_TEMPLATE = `Role: You are a specialist in creating viral Instagram carousels.
+Task: Create a {{count}}-slide carousel script about: "{{topic}}".
 
-Rules:
-1. Slide 1 must be a hook/cover.
-2. The last slide must be a call to action.
-3. Keep titles short (max 5 words).
-4. Keep body text punchy and minimal (max 20 words).
+Narrative Structure:
+1. Slide 1 (The Hook): A curiosity-inducing question, strong statement, or specific promise.
+2. Slide 2 (Context): Situate the problem specifically for the target audience.
+3. Slide 3 (Agitation): Deepen the pain point to create emotional identification.
+4. Slides 4 to {{count}}-1 (The Solution): Actionable steps, frameworks, or specific insights.
+5. Slide {{count}} (CTA): A clear directive to Save, Share, or Comment.
 
-Return ONLY a JSON array of objects. Each object must have exactly two properties: "title" and "body".
-Do not wrap in markdown code blocks. Just return the raw JSON string.`;
+Style Rules:
+- Tone: Authoritative yet accessible.
+- Mental Triggers: Use curiosity and reciprocity.
+- Visuals: Use emojis intentionally to reinforce the message.
+- Titles: Short & punchy (Max 7 words).
+- Body: Clean & minimalist (Max 30 words). Use <b>bold</b> for key insights.
+
+Output Format:
+Return ONLY a raw JSON array of objects.
+Each object must have exactly: "title" and "body".
+NO markdown formatting (no \`\`\`json).`;
 
 export const AIWriter: React.FC<AIWriterProps> = ({ onScriptGenerated }) => {
   const [topic, setTopic] = useState('');
@@ -36,7 +47,7 @@ export const AIWriter: React.FC<AIWriterProps> = ({ onScriptGenerated }) => {
       if (!apiKey) throw new Error("API Key not found.");
 
       // Pass the custom prompt template to the service
-      const script = await generateCarouselScript(apiKey, topic, 5, promptTemplate);
+      const script = await generateCarouselScript(apiKey, topic, 7, promptTemplate); // Defaulting to 7 slides for better narrative depth
       
       // Convert script to slides
       const newSlides: Slide[] = script.map((item, index) => {
@@ -69,16 +80,16 @@ export const AIWriter: React.FC<AIWriterProps> = ({ onScriptGenerated }) => {
         </div>
         <div>
             <h3 className="text-lg font-semibold text-white">AI Writer</h3>
-            <p className="text-sm text-gray-400">Draft your carousel from a simple topic.</p>
+            <p className="text-sm text-gray-400">Draft viral carousels with a structured narrative.</p>
         </div>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">Topic or Rough Draft</label>
+          <label className="block text-sm font-medium text-gray-300 mb-1">Topic / Target Audience</label>
           <textarea
             className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-green-500 focus:outline-none resize-none h-24"
-            placeholder="e.g. 5 tips for better sleep, or paste a rough paragraph here..."
+            placeholder="e.g. 'Productivity for ADHD Entrepreneurs' or 'How to bake sourdough for beginners'..."
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
           />
@@ -112,7 +123,7 @@ export const AIWriter: React.FC<AIWriterProps> = ({ onScriptGenerated }) => {
                     className="w-full h-48 bg-gray-900 border border-gray-700 rounded p-3 text-xs text-gray-300 font-mono focus:ring-1 focus:ring-green-500 focus:outline-none resize-y"
                 />
                 <div className="text-[10px] text-gray-500 leading-relaxed">
-                   <p>Use <span className="text-gray-300 font-mono">{`{{topic}}`}</span> to insert your topic and <span className="text-gray-300 font-mono">{`{{count}}`}</span> for slide count (5).</p>
+                   <p>Use <span className="text-gray-300 font-mono">{`{{topic}}`}</span> to insert your topic and <span className="text-gray-300 font-mono">{`{{count}}`}</span> for slide count.</p>
                    <p className="mt-1 text-orange-400/80">⚠️ Warning: Do not remove the JSON formatting instructions, or the app will fail to create slides.</p>
                 </div>
              </div>
@@ -126,7 +137,7 @@ export const AIWriter: React.FC<AIWriterProps> = ({ onScriptGenerated }) => {
             className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
             icon={<FileText className="w-4 h-4" />}
         >
-          Generate Content
+          Generate Narrative
         </Button>
 
         {error && (
@@ -137,7 +148,7 @@ export const AIWriter: React.FC<AIWriterProps> = ({ onScriptGenerated }) => {
         )}
 
         <div className="text-xs text-gray-500 mt-4">
-            <p>Tip: This will replace your current slides. Be sure to export any existing work first.</p>
+            <p>Tip: This generates ~7 slides with a Hook > Context > Solution > CTA structure.</p>
         </div>
       </div>
     </div>

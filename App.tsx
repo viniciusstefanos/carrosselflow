@@ -17,10 +17,10 @@ import {
 
 // Default Data
 const INITIAL_SLIDES: Slide[] = [
-  { id: '1', type: SlideType.COVER, title: 'Design', body: 'Mastering the art of <b>simplicity</b>.' },
-  { id: '2', type: SlideType.CONTENT, title: 'Less is More', body: 'Minimalism is not about having less, it’s about making room for what <mark>matters most</mark>.' },
-  { id: '3', type: SlideType.QUOTE, title: 'Simplicity', body: 'Leonardo da Vinci' },
-  { id: '4', type: SlideType.END, title: 'Thanks for reading!', body: 'Save this post for later' },
+  { id: '1', type: SlideType.COVER, title: 'Stop <b>Guessing</b>', body: 'The secret to viral content is not luck, it\'s <mark>psychology</mark>.' },
+  { id: '2', type: SlideType.CONTENT, title: 'The Problem', body: 'Most creators focus on visuals but ignore the <b>narrative arc</b>.\n\nThis leads to high impressions but low conversion.' },
+  { id: '3', type: SlideType.CONTENT, title: 'The Solution', body: 'Use the <b>H.I.T. Framework</b>:\n\n1. Hook\n2. Insight\n3. Takeaway\n\nStructure creates <mark>retention</mark>.' },
+  { id: '4', type: SlideType.END, title: 'Try it out!', body: 'Save this template and start creating.' },
 ];
 
 const INITIAL_USER: UserProfile = {
@@ -52,6 +52,7 @@ export default function App() {
   // Text Refinement State
   const [isRefining, setIsRefining] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [useEmojis, setUseEmojis] = useState(true);
   
   // Refs
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -200,7 +201,8 @@ export default function App() {
             alert("API Key needed for AI tools.");
             return;
         }
-        const newText = await refineText(apiKey, selectedSlide.body, type);
+        // Pass useEmojis state
+        const newText = await refineText(apiKey, selectedSlide.body, type, useEmojis);
         updateSlide(selectedSlide.id, { body: newText });
     } catch(e) {
         console.error("Text refinement failed", e);
@@ -571,11 +573,13 @@ export default function App() {
                               >
                                 <Highlighter className="w-3.5 h-3.5" />
                               </button>
+                              
+                              {/* Emoji Picker */}
                               <div className="relative">
                                 <button 
                                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                                   className={`p-1.5 rounded hover:bg-gray-700 transition-colors ${showEmojiPicker ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white'}`}
-                                  title="Emoji"
+                                  title="Insert Emoji"
                                 >
                                   <Smile className="w-3.5 h-3.5" />
                                 </button>
@@ -602,6 +606,18 @@ export default function App() {
 
                            {/* AI Tools Group */}
                            <div className="flex items-center gap-1">
+                              
+                              {/* Emoji Toggle for AI */}
+                              <button
+                                onClick={() => setUseEmojis(!useEmojis)}
+                                className={`p-1.5 rounded-md transition-all ${useEmojis ? 'text-yellow-400 hover:bg-gray-700/50' : 'text-gray-600 hover:text-gray-400 hover:bg-gray-700/50'}`}
+                                title={useEmojis ? "AI Emojis: ON" : "AI Emojis: OFF"}
+                              >
+                                <Smile className="w-3.5 h-3.5" />
+                              </button>
+
+                              <div className="w-px h-3 bg-gray-700 mx-1"></div>
+
                               <button 
                                   onClick={() => handleRefineText('punchy')} 
                                   disabled={isRefining || !selectedSlide.body}
