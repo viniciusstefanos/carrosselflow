@@ -148,7 +148,7 @@ export const AIWriter: React.FC<AIWriterProps> = ({ onScriptGenerated }) => {
         )}
 
         <div className="text-xs text-gray-500 mt-4">
-            <p>Tip: This generates ~7 slides with a Hook > Context > Solution > CTA structure.</p>
+            <p>Tip: This generates ~7 slides with a Hook &gt; Context &gt; Solution &gt; CTA structure.</p>
         </div>
       </div>
     </div>
